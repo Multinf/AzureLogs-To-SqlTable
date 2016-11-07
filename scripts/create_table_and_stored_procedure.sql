@@ -27,8 +27,8 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[tbErrorData](
-	[id] [int] NOT NULL,
-	[dtefullDate] [datetime] NOT NULL,
+	[id] [nvarchar](32) NOT NULL,
+	[dtefullDate] [datetime2] NOT NULL,
 	[strname] [nvarchar](100) NOT NULL,
 	[strdescription] [text] NOT NULL,
 	[strplace] [nvarchar](500) NOT NULL,
@@ -59,8 +59,8 @@ GO
 -- Description:	Saves the data from eventlog.xml
 -- =============================================
 CREATE PROCEDURE [dbo].[spInsertErrorLog]
-	@Id INT,
-	@Date DATETIME,
+	@Id NVARCHAR(32),
+	@Date DATETIME2,
 	@Name NVARCHAR(100),
 	@Description TEXT,
 	@Place NVARCHAR(500)
@@ -73,7 +73,6 @@ BEGIN
 			SELECT @Id, @Date, @Name, @Description, @Place
 		END
 END
-
 GO
 
 PRINT N'Creating OK.'

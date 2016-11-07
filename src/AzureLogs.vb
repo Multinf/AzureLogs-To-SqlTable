@@ -4,6 +4,7 @@ Imports System.Net
 Imports System.Xml
 Imports System.Configuration
 Imports System.Data.SqlClient
+Imports System.Globalization
 
 Module AzureLogs
 
@@ -23,7 +24,7 @@ Module AzureLogs
         'Name is the "error"
         'Description is the description of the error
         'Place is where it happened
-        Dim id As Integer = Nothing, fullDate As String = Nothing, name As String = Nothing,
+        Dim id As String = Nothing, fullDate As DateTime = Nothing, name As String = Nothing,
             description As String = Nothing, place As String = Nothing
 
         'Loop through the table data
@@ -33,33 +34,30 @@ Module AzureLogs
             If row("EventData_Id") = contadorPrimario Then
                 Select Case contadorSecundario
                     Case 3
-                        fullDate = row("Data_Text")
+                        'fullDate = Convert.ToDateTime(row("Data_Text"), CultureInfo.InvariantCulture)
+                        Try
+                            fullDate = DateTime.ParseExact(row("Data_Text").ToString, "M/d/yyyy h:mm:ss tt", CultureInfo.InvariantCulture)
+                        Catch ex As Exception
+                            fullDate = Convert.ToDateTime(row("Data_Text"))
+                        End Try
+                    Case 5
+                        id = row("Data_Text")
                     Case 18
                         name = row("Data_Text")
                     Case 19
                         description = row("Data_Text")
                     Case 21
-                        id = contadorPrimario
                         place = row("Data_Text")
                 End Select
                 contadorSecundario += 1
             Else
                 contadorPrimario += 1
                 contadorSecundario = 2
-                'Creating a log in the screen to check if the information is ok.
-                Console.WriteLine("Saving the data with the following params...")
-                Console.WriteLine("Id: " & id)
-                Console.WriteLine("Full Date: " & fullDate)
-                Console.WriteLine("Name of the error: " & name)
-                Console.WriteLine("Description of the error: " & description)
-                Console.WriteLine("Place where the error ocurrs: " & place)
 
                 'Here we call the function to store the data
                 SaveLog(id, fullDate, name, description, place)
             End If
         Next
-
-        Console.ReadKey()
     End Sub
 
     Private Function DownloadXML(ByVal ftpPath As String, ByVal userName As String, ByVal password As String) As StreamReader
@@ -77,7 +75,7 @@ Module AzureLogs
         Return reader
     End Function
 
-    Function SaveLog(ByVal id As Integer, ByVal fullDate As String, ByVal name As String, ByVal description As String, ByVal place As String)
+    Function SaveLog(ByVal id As String, ByVal fullDate As DateTime, ByVal name As String, ByVal description As String, ByVal place As String)
         Using con As New SqlConnection(ConfigurationManager.AppSettings("ConnectionString"))
             con.Open()
             Using cmd As New SqlCommand
@@ -85,8 +83,8 @@ Module AzureLogs
                     .Connection = con
                     .CommandType = CommandType.StoredProcedure
                     .CommandText = "spInsertErrorLog"
-                    .Parameters.Add("@Id", SqlDbType.Int).Value = id
-                    .Parameters.Add("@Date", SqlDbType.VarChar).Value = fullDate
+                    .Parameters.Add("@Id", SqlDbType.NVarChar).Value = id
+                    .Parameters.Add("@Date", SqlDbType.DateTime).Value = fullDate
                     .Parameters.Add("@Name", SqlDbType.NVarChar).Value = name
                     .Parameters.Add("@Description", SqlDbType.Text).Value = description
                     .Parameters.Add("@Place", SqlDbType.NVarChar).Value = place
