@@ -67,7 +67,7 @@ CREATE PROCEDURE [dbo].[spInsertErrorLog]
 AS
 BEGIN
 	
-	IF (SELECT 1 FROM tbErrorData WHERE id = @Id) = 0
+	IF (SELECT 1 FROM tbErrorData WHERE id = @Id) IS NULL
 		BEGIN
 			INSERT INTO tbErrorData(id, dtefullDate, strname, strdescription, strplace)
 			SELECT @Id, @Date, @Name, @Description, @Place

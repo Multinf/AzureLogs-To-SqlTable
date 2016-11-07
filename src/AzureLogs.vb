@@ -46,6 +46,14 @@ Module AzureLogs
             Else
                 contadorPrimario += 1
                 contadorSecundario = 2
+                'Creating a log in the screen to check if the information is ok.
+                Console.WriteLine("Saving the data with the following params...")
+                Console.WriteLine("Id: " & id)
+                Console.WriteLine("Full Date: " & fullDate)
+                Console.WriteLine("Name of the error: " & name)
+                Console.WriteLine("Description of the error: " & description)
+                Console.WriteLine("Place where the error ocurrs: " & place)
+
                 'Here we call the function to store the data
                 SaveLog(id, fullDate, name, description, place)
             End If
@@ -78,7 +86,7 @@ Module AzureLogs
                     .CommandType = CommandType.StoredProcedure
                     .CommandText = "spInsertErrorLog"
                     .Parameters.Add("@Id", SqlDbType.Int).Value = id
-                    .Parameters.Add("@Date", SqlDbType.DateTime).Value = fullDate
+                    .Parameters.Add("@Date", SqlDbType.VarChar).Value = fullDate
                     .Parameters.Add("@Name", SqlDbType.NVarChar).Value = name
                     .Parameters.Add("@Description", SqlDbType.Text).Value = description
                     .Parameters.Add("@Place", SqlDbType.NVarChar).Value = place
